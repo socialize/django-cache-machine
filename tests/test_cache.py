@@ -144,8 +144,19 @@ class CachingTestCase(ExtraAppTestCase):
         raw2 = list(Addon.objects.raw(sql, [2]))[0]
         eq_(raw2.id, 2)
 
-    def test_aggregate_cache(self):
+    @mock.patch('caching.base.cache')
+    def test_aggregate_cache(self, cache_mock):
+        settings.CACHE_AGGREGATE_TIMEOUT = 60
+        cache_mock.scheme = 'memcached'
+        cache_mock.get.return_value = None
+
         val = Addon.objects.all().aggregate(Sum('val'))
+        print val
+
+        args, kwargs = cache_mock.set.call_args
+        key, value, timeout = args
+        eq_(timeout, 60)
+
 
     @mock.patch('caching.base.cache')
     def test_count_cache(self, cache_mock):
