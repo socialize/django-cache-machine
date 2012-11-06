@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import translation, encoding
+from django.db.models.aggregates import Sum
 
 import jinja2
 import mock
@@ -142,6 +143,9 @@ class CachingTestCase(ExtraAppTestCase):
 
         raw2 = list(Addon.objects.raw(sql, [2]))[0]
         eq_(raw2.id, 2)
+
+    def test_aggregate_cache(self):
+        val = Addon.objects.all().aggregate(Sum('val'))
 
     @mock.patch('caching.base.cache')
     def test_count_cache(self, cache_mock):

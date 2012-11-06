@@ -196,7 +196,16 @@ class CachingQuerySet(models.query.QuerySet):
         if self.query.select_related:
             others.dup_select_related(self)
         return others
-
+     
+    def aggregate(self, *args, **kwargs):
+        timeout = getattr(settings, 'CACHE_AGGREGATE_TIMEOUT', None)
+        super_aggregate = super(CachingQuerySet, self).aggregate
+        query_string = 'aggregate:%s' % self.query_key()
+        if self.timeout == NO_CACHE or timeout is None:
+            return super_aggregate(*args, **kwargs)
+        else:
+            return cached_with(self, super_aggregate, query_string, timeout, func_arg=args, func_kwargs=kwargs)
+     
     def count(self):
         timeout = getattr(settings, 'CACHE_COUNT_TIMEOUT', None)
         super_count = super(CachingQuerySet, self).count
@@ -278,14 +287,14 @@ def cached(function, key_, duration=None):
     return val
 
 
-def cached_with(obj, f, f_key, timeout=None):
+def cached_with(obj, f, f_key, timeout=None, func_args=[], func_kwargs={}):
     """Helper for caching a function call within an object's flush list."""
     try:
         obj_key = (obj.query_key() if hasattr(obj, 'query_key')
                    else obj.cache_key)
     except AttributeError:
         log.warning(u'%r cannot be cached.' % encoding.smart_str(obj))
-        return f()
+        return f(*func_args, **func_kwargs)
 
     key = '%s:%s' % tuple(map(encoding.smart_str, (f_key, obj_key)))
     # Put the key generated in cached() into this object's flush list.

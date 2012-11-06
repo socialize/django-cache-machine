@@ -41,7 +41,7 @@ def test():
     for settings in SETTINGS:
         print settings
         os.environ['DJANGO_SETTINGS_MODULE'] = 'cache-machine.%s' % settings
-        local('django-admin.py test')
+        local('django-admin.py test --failfast')
 
 
 def updoc():
