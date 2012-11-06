@@ -274,13 +274,13 @@ def _function_cache_key(key):
     return make_key('f:%s' % key, with_locale=True)
 
 
-def cached(function, key_, duration=None):
+def cached(function, key_, duration=None, func_args=[], func_kwargs={}):
     """Only calls the function if ``key`` is not already in the cache."""
     key = _function_cache_key(key_)
     val = cache.get(key)
     if val is None:
         log.debug('cache miss for %s' % key)
-        val = function()
+        val = function(*func_args, **func_kwargs)
         cache.set(key, val, duration)
     else:
         log.debug('cache hit for %s' % key)
@@ -300,7 +300,7 @@ def cached_with(obj, f, f_key, timeout=None, func_args=[], func_kwargs={}):
     # Put the key generated in cached() into this object's flush list.
     invalidator.add_to_flush_list(
         {obj.flush_key(): [_function_cache_key(key)]})
-    return cached(f, key, timeout)
+    return cached(f, key, timeout, func_args=func_args, func_kwargs=func_kwargs)
 
 
 class cached_method(object):

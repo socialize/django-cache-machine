@@ -150,10 +150,14 @@ class CachingTestCase(ExtraAppTestCase):
         cache_mock.scheme = 'memcached'
         cache_mock.get.return_value = None
 
-        val = Addon.objects.all().aggregate(Sum('val'))
-        print val
+        sum_val = Addon.objects.all().aggregate(Sum('val'))
+        assert 'val__sum' in sum_val
+        assert sum_val['val__sum'] == 84
 
         args, kwargs = cache_mock.set.call_args
+        print args
+        print kwargs
+        assert False
         key, value, timeout = args
         eq_(timeout, 60)
 
