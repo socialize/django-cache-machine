@@ -37,11 +37,11 @@ try:
 except Exception:
     print 'WARNING: Skipping redis tests.'
 
-def test():
+def test(test_params=""):
     for settings in SETTINGS:
         print settings
         os.environ['DJANGO_SETTINGS_MODULE'] = 'cache-machine.%s' % settings
-        local('django-admin.py test --failfast --verbosity 2')
+        local('django-admin.py test %s' % test_params)
 
 
 def updoc():
