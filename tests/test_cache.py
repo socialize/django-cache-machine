@@ -145,12 +145,12 @@ class CachingTestCase(ExtraAppTestCase):
         eq_(raw2.id, 2)
 
     @mock.patch('caching.base.cache')
-    def test_aggregate_cache(self, cache_mock):
-        settings.CACHE_AGGREGATE_TIMEOUT = 60
+    def test_annotate_cache(self, cache_mock):
+        settings.CACHE_ANNOTATE_TIMEOUT = 60
         cache_mock.scheme = 'memcached'
         cache_mock.get.return_value = None
 
-        sum_val = Addon.objects.all().aggregate(Sum('val'))
+        sum_val = Addon.objects.all().annotate(Sum('val'))
         assert 'val__sum' in sum_val
         assert sum_val['val__sum'] == 84
 

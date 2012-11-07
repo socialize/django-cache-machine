@@ -197,14 +197,14 @@ class CachingQuerySet(models.query.QuerySet):
             others.dup_select_related(self)
         return others
 
-    def aggregate(self, *args, **kwargs):
-        timeout = getattr(settings, 'CACHE_AGGREGATE_TIMEOUT', None)
-        super_aggregate = super(CachingQuerySet, self).aggregate
-        query_string = 'aggregate:%s' % self.query_key()
+    def annotate(self, *args, **kwargs):
+        timeout = getattr(settings, 'CACHE_ANNOTATE_TIMEOUT', None)
+        super_annotate = super(CachingQuerySet, self).annotate
+        query_string = 'annotate:%s' % self.query_key()
         if self.timeout == NO_CACHE or timeout is None:
-            return super_aggregate(*args, **kwargs)
+            return super_annotate(*args, **kwargs)
         else:
-            return cached_with(self, super_aggregate, query_string, timeout, func_args=args, func_kwargs=kwargs)
+            return cached_with(self, super_annotate, query_string, timeout, func_args=args, func_kwargs=kwargs)
 
     def count(self):
         timeout = getattr(settings, 'CACHE_COUNT_TIMEOUT', None)
