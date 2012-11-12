@@ -198,6 +198,9 @@ class CachingQuerySet(models.query.QuerySet):
         return others
 
     def aggregate(self, *args, **kwargs):
+        timeout = self.timeout
+        if self.timeout is None:
+            timeout = getattr(settings, 'CACHE_AGGREGATE_TIMEOUT', None)
         timeout = getattr(settings, 'CACHE_AGGREGATE_TIMEOUT', None)
         super_aggregate = super(CachingQuerySet, self).aggregate
         query_string = 'aggregate:%s' % self.query_key()
