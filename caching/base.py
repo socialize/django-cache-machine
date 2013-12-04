@@ -48,7 +48,7 @@ class CachingManager(models.Manager):
 
     def invalidate(self, *objects):
         """Invalidate all the flush lists associated with ``objects``."""
-        keys = [k for o in objects for k in o._cache_keys(get_fk_keys=False)]
+        keys = [k for o in objects for k in o._cache_keys()]
         invalidator.invalidate_keys(keys)
 
     def raw(self, raw_query, params=None, *args, **kwargs):
@@ -252,14 +252,13 @@ class CachingMixin:
         key_parts = ('o', cls._meta, pk)
         return ':'.join(map(encoding.smart_unicode, key_parts))
 
-    def _cache_keys(self, get_fk_keys=True):
+    def _cache_keys(self):
         """Return the cache key for self plus all related foreign keys."""
-        if get_fk_keys: 
-            fks = dict((f, getattr(self, f.attname)) for f in self._meta.fields
-                        if isinstance(f, models.ForeignKey))
+        fks = dict((f, getattr(self, f.attname)) for f in self._meta.fields
+                    if isinstance(f, models.ForeignKey))
 
-            keys = [fk.rel.to._cache_key(val) for fk, val in fks.items()
-                    if val is not None and hasattr(fk.rel.to, '_cache_key')]
+        keys = [fk.rel.to._cache_key(val) for fk, val in fks.items()
+                if val is not None and hasattr(fk.rel.to, '_cache_key')]
         return (self.cache_key,) + tuple(keys)
 
 
