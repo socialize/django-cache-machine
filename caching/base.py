@@ -260,7 +260,9 @@ class CachingMixin:
 
             keys = [fk.rel.to._cache_key(val) for fk, val in fks.items()
                     if val is not None and hasattr(fk.rel.to, '_cache_key')]
-        return (self.cache_key,) + tuple(keys)
+            return (self.cache_key,) + tuple(keys)
+        else:
+            return (self.cacche_key,)
 
 
 class CachingRawQuerySet(models.query.RawQuerySet):
