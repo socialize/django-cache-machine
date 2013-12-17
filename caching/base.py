@@ -122,6 +122,7 @@ class CacheMachine(object):
         """Cache query_key => objects, then update the flush lists."""
         query_key = self.query_key()
         query_flush = flush_key(self.query_string)
+        logger.info("CACHEING: Adding to cache: %s -- %s -- %s" % (query_key, [i.id for i in objects], objects))
         cache.add(query_key, objects, timeout=self.timeout)
         invalidator.cache_objects(objects, query_key, query_flush)
 
